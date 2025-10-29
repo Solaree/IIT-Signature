@@ -1,4 +1,4 @@
-import io, os, sys, time, json, ctypes, base64, argparse, warnings, requests
+import io, os, re, sys, time, json, ctypes, base64, platform, argparse, warnings, requests
 
 from lxml import etree
 from asn1crypto import cms
@@ -7,14 +7,14 @@ from zoneinfo import ZoneInfo
 from pyhanko.pdf_utils.reader import PdfFileReader
 
 
-CACHE_FILENAME = ".cca_certs.json"
+CACHE_FILENAME = ".ccacerts.json"
 CACHE_MAX_AGE = 24 * 3600  # 24 hours
 CCA_URL = "https://czo.gov.ua/download/tl/TL-UA-DSTU.xml" # Trusted list with the list of QTSPs for the use of TS within Ukraine
 
 # https://zakon.rada.gov.ua/laws/show/z1399-12
 OID_MAP = {
   "1.2.804.2.1.1.1.1.3.1.1": "Dstu4145WithGost34311pb",
-  "1.2.804.2.1.1.1.1.3.1.2": "Dstu4145WithGost34311оnb",
+  "1.2.804.2.1.1.1.1.3.1.2": "Dstu4145WithGost34311onb",
   "1.2.804.2.1.1.1.1.3.6.1": "Dstu4145WithDstu7564-256",
   "1.2.804.2.1.1.1.1.3.6.2": "Dstu4145WithDstu7564-384",
   "1.2.804.2.1.1.1.1.3.6.3": "Dstu4145WithDstu7564-512",
@@ -129,7 +129,23 @@ if __name__ == "__main__":
 
   warnings.filterwarnings("ignore", category=UserWarning)
 
-  lib = ctypes.cdll.LoadLibrary("libuapki.so")
+  system = platform.system()
+  match system:
+    case "Darwin":
+      pattern = r"libuapki(?:\.\d+(?:\.\d+)*)?\.dylib"
+    case "Linux":
+      pattern = r"libuapki(?:\.\d+(?:\.\d+)*)?\.so"
+    case "Windows":
+      pattern = r"uapki\.dll"
+    case _:
+      raise RuntimeError(f"Unsupported OS: {system}")
+  libdir = os.getcwd()
+  lib_match = [os.path.join(libdir, f) for f in os.listdir(libdir) if re.fullmatch(pattern, f)]
+  if not lib_match:
+    raise FileNotFoundError(f"No matching UAPKI library found in {libdir}")
+  filename = sorted(lib_match)[0]
+
+  lib = ctypes.cdll.LoadLibrary(filename)
   lib.process.argtypes = [ctypes.c_char_p]
   lib.process.restype = ctypes.c_void_p
   lib.json_free.argtypes = [ctypes.c_void_p]
@@ -257,4 +273,3 @@ if __name__ == "__main__":
     print(f"[!] Deinitialization failed: {response_str}")
     sys.exit(1)
   lib.json_free(response_ptr)
-  

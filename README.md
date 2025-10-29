@@ -1,12 +1,12 @@
-# Check-The-Signature
+# IIT-Signature
 A tiny alternative to [JSC "IIT" web-widget for verifying the user's signature of the Certification Authority](https://eu.iit.com.ua/verify-widget)
 
 Verify PAdES and CAdES digital signatures using DSTU 4145-2002.
 
 
-## Installation
+## Installation (example for Linux)
 
-### 1. Download [UAPKI](https://github.com/specinfo-ua/UAPKI) for Linux (latest release)
+### 1. Download [latest UAPKI](https://github.com/specinfo-ua/UAPKI/releases/latest)
 
 ```sh
 $ curl -L -o uapki-v2.0.12-linux-amd64.tar.gz https://github.com/specinfo-ua/UAPKI/releases/download/v2.0.12/uapki-v2.0.12-linux-amd64.tar.gz
@@ -19,30 +19,22 @@ $ tar -xzf uapki-v2.0.12-linux-amd64.tar.gz
 $ cd uapki-v2.0.12-linux-amd64
 ```
 
-### 3. Copy the libraries to `/usr/lib` and create symlinks
+### 3. Copy the libraries to workspace and create symlinks
 
 ```sh
-$ sudo cp libuapki.so.2.0.12 libuapkic.so.2.0.12 libuapkif.so.2.0.12 /usr/lib/
-$ cd /usr/lib
-$ sudo ln -sf libuapki.so.2.0.12 libuapki.so
-$ sudo ln -sf libuapki.so.2.0.12 libuapki.so.2
-$ sudo ln -sf libuapkic.so.2.0.12 libuapkic.so
-$ sudo ln -sf libuapkic.so.2.0.12 libuapkic.so.2
-$ sudo ln -sf libuapkif.so.2.0.12 libuapkif.so
-$ sudo ln -sf libuapkif.so.2.0.12 libuapkif.so.2
+$ cp libuapki.so.2.0.12 libuapkic.so.2.0.12 libuapkif.so.2.0.12 ~/.../IIT-Signature
+$ cd ~/.../IIT-Signature
+$ ln -sf libuapkic.so.2.0.12 libuapkic.so.2
+$ ln -sf libuapkif.so.2.0.12 libuapkif.so.2
 ```
 
-### 4. Update the dynamic linker cache
-
-```sh
-$ sudo ldconfig
-```
+A similar approach can also be performed on macOS and Windows systems.
 
 ---
 
 ## Running the Verification Script
 
-1. Ensure you have **Python 3** and **pip** installed.
+1. Ensure you have [**Python 3**](https://www.python.org/downloads/) and [**pip**](https://packaging.python.org/en/latest/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line) installed.
 
 2. Install required Python packages:
 
@@ -98,5 +90,6 @@ options:
 ## Notes
 
 * Adjust library version numbers if you download a different UAPKI version.
+* You need to set up a [Python virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments) for proper use with macOS.
 * Cached trusted certificates are automatically handled to speed up repeated verifications.
-* Support for the **protocol for the creation and verification of advanced electronic signatures**, as well as for the **XAdES (XML signatures)** format, is planned for future releases.
+* Support for the **protocol for the creation and verification of advanced electronic signatures**, as well as for the **XAdES (XML signatures)** format, is planned for future updates.
